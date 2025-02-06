@@ -395,6 +395,37 @@ function SyncConfigModal(props: { onClose?: () => void }) {
               ></input>
             </ListItem>
           ) : null}
+          <ListItem
+            title={Locale.Settings.Sync.Config.Encrypt.Title}
+            subTitle={Locale.Settings.Sync.Config.Encrypt.SubTitle}
+          >
+            <input
+              type="checkbox"
+              checked={syncStore.encrypt.enabled}
+              onChange={(e) => {
+                syncStore.update(
+                  (config) =>
+                    (config.encrypt.enabled = e.currentTarget.checked),
+                );
+              }}
+            ></input>
+          </ListItem>
+          {syncStore.encrypt.enabled ? (
+            <ListItem
+              title={Locale.Settings.Sync.Config.Encrypt.Password}
+              subTitle={Locale.Settings.Sync.Config.Encrypt.PasswordSubTitle}
+            >
+              <PasswordInput
+                value={syncStore.encrypt.password}
+                onChange={(e) => {
+                  syncStore.update(
+                    (config) =>
+                      (config.encrypt.password = e.currentTarget.value),
+                  );
+                }}
+              ></PasswordInput>
+            </ListItem>
+          ) : null}
         </List>
 
         {syncStore.provider === ProviderType.WebDAV && (

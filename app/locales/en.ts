@@ -258,6 +258,12 @@ const en: LocaleType = {
           UserName: "Backup Name",
           Password: "UpStash Redis REST Token",
         },
+        Encrypt: {
+          Title: "Encrypt",
+          SubTitle: "Encrypt backup data",
+          Password: "Password",
+          PasswordSubTitle: "Password for encrypting backup data",
+        },
       },
 
       LocalState: "Local Data",

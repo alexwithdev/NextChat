@@ -255,6 +255,12 @@ const cn = {
           UserName: "备份名称",
           Password: "UpStash Redis REST Token",
         },
+        Encrypt: {
+          Title: "加密",
+          SubTitle: "加密备份数据",
+          Password: "密码",
+          PasswordSubTitle: "加密备份数据密码",
+        },
       },
 
       LocalState: "本地数据",
