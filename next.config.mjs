@@ -1,4 +1,9 @@
 import webpack from "webpack";
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const mode = process.env.BUILD_MODE ?? "standalone";
 console.log("[Next] build mode", mode);
@@ -23,6 +28,10 @@ const nextConfig = {
     config.resolve.fallback = {
       child_process: false,
     };
+
+    if(mode === "export"){
+      config.resolve.alias['../mcp/actions'] = path.resolve(__dirname, 'app/mcp/actions.static.ts');
+    }
 
     return config;
   },
