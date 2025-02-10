@@ -179,10 +179,9 @@ export const useSyncStore = createPersistStore(
           );
           return;
         } else {
-          const parsedRemoteState = unserialize<AppState>(
-            await client.get(config.username),
-            { encrypt: encryptConfig.enabled ? encryptConfig : undefined },
-          );
+          const parsedRemoteState = unserialize<AppState>(remoteState, {
+            encrypt: encryptConfig.enabled ? encryptConfig : undefined,
+          });
           mergeAppState(localState, parsedRemoteState);
           setLocalAppState(localState);
         }
