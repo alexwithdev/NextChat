@@ -33,6 +33,16 @@ const nextConfig = {
       config.resolve.alias['../mcp/actions'] = path.resolve(__dirname, 'app/mcp/actions.static.ts');
     }
 
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        ...Object.keys(process.env).reduce((acc, key) => {
+          acc[`process.env.${key}`] = JSON.stringify(process.env[key]);
+          return acc;
+        }, {}),
+        'process.env.BUILD_MODE': JSON.stringify(mode),
+      }),
+    );
+
     return config;
   },
   output: mode,

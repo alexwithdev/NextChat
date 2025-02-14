@@ -153,13 +153,13 @@ export function mergeWithUpdate<T extends { lastUpdateTime?: number }>(
   remoteState: T,
 ) {
   const localUpdateTime = localState.lastUpdateTime ?? 0;
-  const remoteUpdateTime = localState.lastUpdateTime ?? 1;
+  const remoteUpdateTime = remoteState.lastUpdateTime ?? 1;
 
   if (localUpdateTime < remoteUpdateTime) {
-    merge(remoteState, localState);
+    merge(localState, remoteState);
     return { ...remoteState };
   } else {
-    merge(localState, remoteState);
+    merge(remoteState, localState);
     return { ...localState };
   }
 }

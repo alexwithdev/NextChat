@@ -5,6 +5,8 @@ import { chunks } from "../format";
 export type UpstashConfig = SyncStore["upstash"];
 export type UpStashClient = ReturnType<typeof createUpstashClient>;
 
+const isStaticExport = process.env.BUILD_MODE === "export";
+
 export function createUpstashClient(store: SyncStore) {
   const config = store.upstash;
   const storeKey = config.username.length === 0 ? STORAGE_KEY : config.username;
@@ -90,6 +92,8 @@ export function createUpstashClient(store: SyncStore) {
 
       if (proxyUrl.length > 0 && !proxyUrl.endsWith("/")) {
         proxyUrl += "/";
+      } else if (proxyUrl.trim().length <= 0 && isStaticExport) {
+        return config.endpoint + "/" + path;
       }
 
       let url;
