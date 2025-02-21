@@ -6,6 +6,7 @@ const createJestConfig = nextJest({
   dir: "./",
 });
 
+const esModules = ['lodash-es']
 // Add any custom config to be passed to Jest
 const config: Config = {
   coverageProvider: "v8",
@@ -15,7 +16,17 @@ const config: Config = {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
   },
+  transformIgnorePatterns: [`/node_modules/(?!(${esModules.join('|')})/)`],
 };
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
-export default createJestConfig(config);
+// eslint-disable-next-line import/no-anonymous-default-export
+export default async function () {
+  const jestConfig = await createJestConfig(config)()
+  return {
+    ...jestConfig,
+    transformIgnorePatterns: jestConfig.transformIgnorePatterns!.filter(
+      (ptn) => ptn !== '/node_modules/'
+    ), // ['^.+\\.module\\.(css|sass|scss)$', '/node_modules/(?!(package1|package2)/']
+  }
+};
