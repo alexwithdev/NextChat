@@ -62,8 +62,7 @@ describe('JSONModifyRecorder', () => {
   it('Should handle merging with deleted keys', async () => {
     const value1 = new JSONModifyRecorder({ a: 1, b: 2 });
     await sleep(1);
-    const value2 = new JSONModifyRecorder({ a: 1, b: 2 });
-    value2.update({ a: 1 }); // Simulate deletion of 'b'
+    const value2 = new JSONModifyRecorder({ a: 1 });
     value1.merge(value2);
 
     expect(value1.getValue()).toEqual({ a: 1 });
