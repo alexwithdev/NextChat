@@ -1889,10 +1889,10 @@ export function Settings() {
             subTitle={Locale.Settings.Access.CustomModel.SubTitle}
             vertical={true}
           >
-            <input
+            <textarea
               aria-label={Locale.Settings.Access.CustomModel.Title}
               style={{ width: "100%", maxWidth: "unset", textAlign: "left" }}
-              type="text"
+              autoComplete="off"
               value={config.customModels}
               placeholder="model1,model2,model3"
               onChange={(e) =>
@@ -1900,7 +1900,8 @@ export function Settings() {
                   (config) => (config.customModels = e.currentTarget.value),
                 )
               }
-            ></input>
+              rows={5}
+            ></textarea>
           </ListItem>
         </List>
 
