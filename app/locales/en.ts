@@ -227,7 +227,8 @@ const en: LocaleType = {
       NotSyncYet: "Not sync yet",
       Success: "Sync Success",
       Fail: "Sync Fail",
-
+      OverrideSuccess: "Override Success",
+      OverrideFail: "Override Fail",
       Config: {
         Modal: {
           Title: "Config Sync",
@@ -796,6 +797,8 @@ const en: LocaleType = {
     Import: "Import",
     Sync: "Sync",
     Config: "Config",
+    OverrideRemote: "Override Remote",
+    OverrideLocal: "Override Local",
   },
   Exporter: {
     Description: {

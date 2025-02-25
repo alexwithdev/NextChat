@@ -200,6 +200,50 @@ export const useSyncStore = createPersistStore(
       this.markSyncTime();
     },
 
+    async overrideRemote() {
+      const localState = getLocalAppState();
+      const provider = get().provider;
+      const config = get()[provider];
+      const client = this.getClient();
+      const encryptConfig = get().encrypt;
+
+      await client.set(
+        config.username,
+        serialize(localState, {
+          encrypt: encryptConfig.enabled ? encryptConfig : undefined,
+        }),
+      );
+
+      this.markSyncTime();
+    },
+
+    async overrideLocal() {
+      const provider = get().provider;
+      const config = get()[provider];
+      const client = this.getClient();
+      const encryptConfig = get().encrypt;
+
+      try {
+        const remoteState = await client.get(config.username);
+        if (!remoteState || remoteState === "") {
+          console.log(
+            "[Sync] Remote state is empty, using local state instead.",
+          );
+          return;
+        } else {
+          const parsedRemoteState = unserialize<AppState>(remoteState, {
+            encrypt: encryptConfig.enabled ? encryptConfig : undefined,
+          });
+          setLocalAppState(parsedRemoteState);
+        }
+      } catch (e) {
+        console.log("[Sync] failed to get remote state", e);
+        throw e;
+      }
+
+      this.markSyncTime();
+    },
+
     async check() {
       const client = this.getClient();
       return await client.check();

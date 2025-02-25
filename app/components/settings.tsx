@@ -562,19 +562,47 @@ function SyncItems() {
               }}
             />
             {couldSync && (
-              <IconButton
-                icon={<ResetIcon />}
-                text={Locale.UI.Sync}
-                onClick={async () => {
-                  try {
-                    await syncStore.sync();
-                    showToast(Locale.Settings.Sync.Success);
-                  } catch (e) {
-                    showToast(Locale.Settings.Sync.Fail);
-                    console.error("[Sync]", e);
-                  }
-                }}
-              />
+              <>
+                <IconButton
+                  icon={<ResetIcon />}
+                  text={Locale.UI.Sync}
+                  onClick={async () => {
+                    try {
+                      await syncStore.sync();
+                      showToast(Locale.Settings.Sync.Success);
+                    } catch (e) {
+                      showToast(Locale.Settings.Sync.Fail);
+                      console.error("[Sync]", e);
+                    }
+                  }}
+                />
+                <IconButton
+                  icon={<UploadIcon />}
+                  text={Locale.UI.OverrideRemote}
+                  onClick={async () => {
+                    try {
+                      await syncStore.overrideRemote();
+                      showToast(Locale.Settings.Sync.OverrideSuccess);
+                    } catch (e) {
+                      showToast(Locale.Settings.Sync.OverrideFail);
+                      console.error("[Sync]", e);
+                    }
+                  }}
+                />
+                <IconButton
+                  icon={<DownloadIcon />}
+                  text={Locale.UI.OverrideLocal}
+                  onClick={async () => {
+                    try {
+                      await syncStore.overrideLocal();
+                      showToast(Locale.Settings.Sync.OverrideSuccess);
+                    } catch (e) {
+                      showToast(Locale.Settings.Sync.OverrideFail);
+                      console.error("[Sync]", e);
+                    }
+                  }}
+                />
+              </>
             )}
           </div>
         </ListItem>

@@ -225,7 +225,8 @@ const cn = {
       NotSyncYet: "还没有进行过同步",
       Success: "同步成功",
       Fail: "同步失败",
-
+      OverrideSuccess: "覆盖成功",
+      OverrideFail: "覆盖失败",
       Config: {
         Modal: {
           Title: "配置云同步",
@@ -790,6 +791,8 @@ const cn = {
     Import: "导入",
     Sync: "同步",
     Config: "配置",
+    OverrideRemote: "覆盖远程",
+    OverrideLocal: "覆盖本地",
   },
   Exporter: {
     Description: {
