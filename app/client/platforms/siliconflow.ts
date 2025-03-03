@@ -20,6 +20,8 @@ import {
   LLMApi,
   LLMModel,
   SpeechOptions,
+  getBearerToken, // Add this import
+  validString, // Add this import
 } from "../api";
 import { getClientConfig } from "@/app/config/client";
 import {
@@ -71,6 +73,18 @@ export class SiliconflowApi implements LLMApi {
     console.log("[Proxy Endpoint] ", baseUrl, path);
 
     return [baseUrl, path].join("/");
+  }
+
+  private getHeaders(): Record<string, string> {
+    const accessStore = useAccessStore.getState();
+    const headers = getHeaders();
+
+    const apiKey = accessStore.siliconflowApiKey;
+    if (validString(apiKey)) {
+      headers["Authorization"] = getBearerToken(apiKey);
+    }
+
+    return headers;
   }
 
   extractMessage(res: any) {
@@ -129,7 +143,7 @@ export class SiliconflowApi implements LLMApi {
         method: "POST",
         body: JSON.stringify(requestPayload),
         signal: controller.signal,
-        headers: getHeaders(),
+        headers: this.getHeaders(), // Use private headers method
       };
 
       // console.log(chatPayload);
@@ -149,7 +163,7 @@ export class SiliconflowApi implements LLMApi {
         return streamWithThink(
           chatPath,
           requestPayload,
-          getHeaders(),
+          this.getHeaders(), // Use private headers method
           tools as any,
           funcs,
           controller,
@@ -259,7 +273,7 @@ export class SiliconflowApi implements LLMApi {
     const res = await fetch(this.path(SiliconFlow.ListModelPath), {
       method: "GET",
       headers: {
-        ...getHeaders(),
+        ...this.getHeaders(), // 改为使用私有方法
       },
     });
 

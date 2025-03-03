@@ -1,5 +1,11 @@
 import { Anthropic, ApiPath } from "@/app/constant";
-import { ChatOptions, getHeaders, LLMApi, SpeechOptions } from "../api";
+import {
+  ChatOptions,
+  getHeaders,
+  LLMApi,
+  SpeechOptions,
+  validString,
+} from "../api";
 import {
   useAccessStore,
   useAppConfig,
@@ -207,7 +213,7 @@ export class ClaudeApi implements LLMApi {
         path,
         requestBody,
         {
-          ...getHeaders(),
+          ...this.getHeaders(),
           "anthropic-version": accessStore.anthropicApiVersion,
         },
         // @ts-ignore
@@ -309,7 +315,7 @@ export class ClaudeApi implements LLMApi {
         body: JSON.stringify(requestBody),
         signal: controller.signal,
         headers: {
-          ...getHeaders(), // get common headers
+          ...this.getHeaders(), // get common headers
           "anthropic-version": accessStore.anthropicApiVersion,
           // do not send `anthropicApiKey` in browser!!!
           // Authorization: getAuthKey(accessStore.anthropicApiKey),
@@ -401,6 +407,23 @@ export class ClaudeApi implements LLMApi {
 
     // try rebuild url, when using cloudflare ai gateway in client
     return cloudflareAIGatewayUrl(`${baseUrl}/${path}`);
+  }
+
+  private getHeaders(): Record<string, string> {
+    const accessStore = useAccessStore.getState();
+    const headers = getHeaders();
+
+    const apiKey = accessStore.anthropicApiKey;
+    if (validString(apiKey)) {
+      headers["x-api-key"] = apiKey.trim();
+    }
+
+    // Add Anthropic API version if present
+    if (validString(accessStore.anthropicApiVersion)) {
+      headers["anthropic-version"] = accessStore.anthropicApiVersion;
+    }
+
+    return headers;
   }
 }
 

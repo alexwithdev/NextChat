@@ -34,6 +34,8 @@ import {
   LLMUsage,
   MultimodalContent,
   SpeechOptions,
+  getBearerToken,
+  validString,
 } from "../api";
 import Locale from "../../locales";
 import { getClientConfig } from "@/app/config/client";
@@ -165,7 +167,7 @@ export class ChatGPTApi implements LLMApi {
         method: "POST",
         body: JSON.stringify(requestPayload),
         signal: controller.signal,
-        headers: getHeaders(),
+        headers: this.getHeaders(), // 改为使用私有方法
       };
 
       // make a fetch request
@@ -297,7 +299,7 @@ export class ChatGPTApi implements LLMApi {
         streamWithThink(
           chatPath,
           requestPayload,
-          getHeaders(),
+          this.getHeaders(), // 改为使用私有方法
           tools as any,
           funcs,
           controller,
@@ -390,7 +392,7 @@ export class ChatGPTApi implements LLMApi {
           method: "POST",
           body: JSON.stringify(requestPayload),
           signal: controller.signal,
-          headers: getHeaders(),
+          headers: this.getHeaders(), // 改为使用私有方法
         };
 
         // make a fetch request
@@ -430,12 +432,12 @@ export class ChatGPTApi implements LLMApi {
         ),
         {
           method: "GET",
-          headers: getHeaders(),
+          headers: this.getHeaders(), // 改为使用私有方法
         },
       ),
       fetch(this.path(OpenaiPath.SubsPath), {
         method: "GET",
-        headers: getHeaders(),
+        headers: this.getHeaders(), // 改为使用私有方法
       }),
     ]);
 
@@ -485,7 +487,7 @@ export class ChatGPTApi implements LLMApi {
     const res = await fetch(this.path(OpenaiPath.ListModelPath), {
       method: "GET",
       headers: {
-        ...getHeaders(),
+        ...this.getHeaders(), // 改为使用私有方法
       },
     });
 
@@ -512,6 +514,18 @@ export class ChatGPTApi implements LLMApi {
         sorted: 1,
       },
     }));
+  }
+
+  getHeaders(): Record<string, string> {
+    const accessStore = useAccessStore.getState();
+    const headers = getHeaders();
+
+    const apiKey = accessStore.openaiApiKey;
+    if (validString(apiKey)) {
+      headers["Authorization"] = getBearerToken(apiKey);
+    }
+
+    return headers;
   }
 }
 export { OpenaiPath };

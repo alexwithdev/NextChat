@@ -13,6 +13,8 @@ import {
   LLMApi,
   LLMModel,
   SpeechOptions,
+  getBearerToken,
+  validString,
 } from "../api";
 import Locale from "../../locales";
 import {
@@ -62,6 +64,20 @@ export class SparkApi implements LLMApi {
 
   speech(options: SpeechOptions): Promise<ArrayBuffer> {
     throw new Error("Method not implemented.");
+  }
+
+  private getHeaders(): Record<string, string> {
+    const accessStore = useAccessStore.getState();
+    const headers = getHeaders();
+
+    if (accessStore.iflytekApiKey && accessStore.iflytekApiSecret) {
+      const apiKey = `${accessStore.iflytekApiKey}:${accessStore.iflytekApiSecret}`;
+      if (validString(apiKey)) {
+        headers["Authorization"] = getBearerToken(apiKey);
+      }
+    }
+
+    return headers;
   }
 
   async chat(options: ChatOptions) {

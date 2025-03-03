@@ -72,6 +72,20 @@ export class ErnieApi implements LLMApi {
     return [baseUrl, path].join("/");
   }
 
+  private getHeaders(): Record<string, string> {
+    const accessStore = useAccessStore.getState();
+    const headers = getHeaders();
+
+    // When using Baidu API in app, we don't need to set auth header
+    // as access token is passed in the URL instead
+    const clientConfig = getClientConfig();
+    if (clientConfig?.isApp) {
+      return headers;
+    }
+
+    return headers;
+  }
+
   speech(options: SpeechOptions): Promise<ArrayBuffer> {
     throw new Error("Method not implemented.");
   }
@@ -144,7 +158,7 @@ export class ErnieApi implements LLMApi {
         method: "POST",
         body: JSON.stringify(requestPayload),
         signal: controller.signal,
-        headers: getHeaders(),
+        headers: this.getHeaders(), // 改为使用私有方法
       };
 
       // make a fetch request

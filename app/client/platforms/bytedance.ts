@@ -15,6 +15,8 @@ import {
   LLMModel,
   MultimodalContent,
   SpeechOptions,
+  getBearerToken,
+  validString,
 } from "../api";
 
 import { streamWithThink } from "@/app/utils/chat";
@@ -84,6 +86,18 @@ export class DoubaoApi implements LLMApi {
     throw new Error("Method not implemented.");
   }
 
+  private getHeaders(): Record<string, string> {
+    const accessStore = useAccessStore.getState();
+    const headers = getHeaders();
+
+    const apiKey = accessStore.bytedanceApiKey;
+    if (validString(apiKey)) {
+      headers["Authorization"] = getBearerToken(apiKey);
+    }
+
+    return headers;
+  }
+
   async chat(options: ChatOptions) {
     const messages: ChatOptions["messages"] = [];
     for (const v of options.messages) {
@@ -122,7 +136,7 @@ export class DoubaoApi implements LLMApi {
         method: "POST",
         body: JSON.stringify(requestPayload),
         signal: controller.signal,
-        headers: getHeaders(),
+        headers: this.getHeaders(), // 改为使用私有方法
       };
 
       // make a fetch request
@@ -140,7 +154,7 @@ export class DoubaoApi implements LLMApi {
         return streamWithThink(
           chatPath,
           requestPayload,
-          getHeaders(),
+          this.getHeaders(), // 改为使用私有方法
           tools as any,
           funcs,
           controller,

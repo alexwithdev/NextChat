@@ -15,6 +15,8 @@ import {
   LLMApi,
   LLMModel,
   SpeechOptions,
+  getBearerToken, // Add this import
+  validString, // Add this import
 } from "../api";
 import { getClientConfig } from "@/app/config/client";
 import { getTimeoutMSByModel } from "@/app/utils";
@@ -54,6 +56,18 @@ export class XAIApi implements LLMApi {
 
   extractMessage(res: any) {
     return res.choices?.at(0)?.message?.content ?? "";
+  }
+
+  private getHeaders(): Record<string, string> {
+    const accessStore = useAccessStore.getState();
+    const headers = getHeaders();
+
+    const apiKey = accessStore.xaiApiKey;
+    if (validString(apiKey)) {
+      headers["Authorization"] = getBearerToken(apiKey);
+    }
+
+    return headers;
   }
 
   speech(options: SpeechOptions): Promise<ArrayBuffer> {
@@ -98,7 +112,7 @@ export class XAIApi implements LLMApi {
         method: "POST",
         body: JSON.stringify(requestPayload),
         signal: controller.signal,
-        headers: getHeaders(),
+        headers: this.getHeaders(), // Use private headers method
       };
 
       // make a fetch request
@@ -116,7 +130,7 @@ export class XAIApi implements LLMApi {
         return stream(
           chatPath,
           requestPayload,
-          getHeaders(),
+          this.getHeaders(), // Use private headers method
           tools as any,
           funcs,
           controller,

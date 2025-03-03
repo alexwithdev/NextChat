@@ -14,6 +14,8 @@ import {
   LLMApi,
   LLMModel,
   SpeechOptions,
+  getBearerToken,
+  validString,
 } from "../api";
 import { getClientConfig } from "@/app/config/client";
 import {
@@ -149,6 +151,18 @@ export class ChatGLMApi implements LLMApi {
     return res.choices?.at(0)?.message?.content ?? "";
   }
 
+  private getHeaders(): Record<string, string> {
+    const accessStore = useAccessStore.getState();
+    const headers = getHeaders();
+
+    const apiKey = accessStore.chatglmApiKey;
+    if (validString(apiKey)) {
+      headers["Authorization"] = getBearerToken(apiKey);
+    }
+
+    return headers;
+  }
+
   speech(options: SpeechOptions): Promise<ArrayBuffer> {
     throw new Error("Method not implemented.");
   }
@@ -185,7 +199,7 @@ export class ChatGLMApi implements LLMApi {
         method: "POST",
         body: JSON.stringify(requestPayload),
         signal: controller.signal,
-        headers: getHeaders(),
+        headers: this.getHeaders(), // 改为使用私有方法
       };
 
       const requestTimeoutId = setTimeout(
@@ -214,7 +228,7 @@ export class ChatGLMApi implements LLMApi {
         return stream(
           path,
           requestPayload,
-          getHeaders(),
+          this.getHeaders(), // 改为使用私有方法
           tools as any,
           funcs,
           controller,

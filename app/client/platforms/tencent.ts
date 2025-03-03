@@ -8,7 +8,7 @@ import {
   LLMApi,
   LLMModel,
   MultimodalContent,
-  SpeechOptions,
+  SpeechOptions, // Keep this import
 } from "../api";
 import Locale from "../../locales";
 import {
@@ -93,6 +93,12 @@ export class HunyuanApi implements LLMApi {
     return res.Choices?.at(0)?.Message?.Content ?? "";
   }
 
+  private getHeaders(): Record<string, string> {
+    const headers = getHeaders();
+
+    return headers;
+  }
+
   speech(options: SpeechOptions): Promise<ArrayBuffer> {
     throw new Error("Method not implemented.");
   }
@@ -133,7 +139,7 @@ export class HunyuanApi implements LLMApi {
         method: "POST",
         body: JSON.stringify(requestPayload),
         signal: controller.signal,
-        headers: getHeaders(),
+        headers: this.getHeaders(), // Use private headers method
       };
 
       // make a fetch request
