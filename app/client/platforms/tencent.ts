@@ -9,6 +9,8 @@ import {
   LLMModel,
   MultimodalContent,
   SpeechOptions,
+  getBearerToken, // Add this import
+  validString, // Add this import
 } from "../api";
 import Locale from "../../locales";
 import {
@@ -93,6 +95,18 @@ export class HunyuanApi implements LLMApi {
     return res.Choices?.at(0)?.Message?.Content ?? "";
   }
 
+  private getHeaders(): Record<string, string> {
+    const accessStore = useAccessStore.getState();
+    const headers = getHeaders();
+
+    const apiKey = accessStore.tencentApiKey;
+    if (validString(apiKey)) {
+      headers["Authorization"] = getBearerToken(apiKey);
+    }
+
+    return headers;
+  }
+
   speech(options: SpeechOptions): Promise<ArrayBuffer> {
     throw new Error("Method not implemented.");
   }
@@ -133,7 +147,7 @@ export class HunyuanApi implements LLMApi {
         method: "POST",
         body: JSON.stringify(requestPayload),
         signal: controller.signal,
-        headers: getHeaders(),
+        headers: this.getHeaders(), // Use private headers method
       };
 
       // make a fetch request

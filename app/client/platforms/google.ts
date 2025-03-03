@@ -6,6 +6,7 @@ import {
   LLMModel,
   LLMUsage,
   SpeechOptions,
+  validString,
 } from "../api";
 import {
   useAccessStore,
@@ -86,6 +87,18 @@ export class GeminiProApi implements LLMApi {
   }
   speech(options: SpeechOptions): Promise<ArrayBuffer> {
     throw new Error("Method not implemented.");
+  }
+
+  private getHeaders(): Record<string, string> {
+    const accessStore = useAccessStore.getState();
+    const headers = getHeaders();
+
+    const apiKey = accessStore.googleApiKey;
+    if (validString(apiKey)) {
+      headers["x-goog-api-key"] = apiKey.trim();
+    }
+
+    return headers;
   }
 
   async chat(options: ChatOptions): Promise<void> {
@@ -195,7 +208,7 @@ export class GeminiProApi implements LLMApi {
         method: "POST",
         body: JSON.stringify(requestPayload),
         signal: controller.signal,
-        headers: getHeaders(),
+        headers: this.getHeaders(), // 改为使用私有方法
       };
 
       const isThinking = options.config.model.includes("-thinking");
@@ -214,7 +227,7 @@ export class GeminiProApi implements LLMApi {
         return stream(
           chatPath,
           requestPayload,
-          getHeaders(),
+          this.getHeaders(), // 改为使用私有方法
           // @ts-ignore
           tools.length > 0
             ? // @ts-ignore

@@ -20,6 +20,8 @@ import {
   LLMApi,
   LLMModel,
   SpeechOptions,
+  getBearerToken,
+  validString,
 } from "../api";
 import { getClientConfig } from "@/app/config/client";
 import { getMessageTextContent } from "@/app/utils";
@@ -54,6 +56,18 @@ export class MoonshotApi implements LLMApi {
     console.log("[Proxy Endpoint] ", baseUrl, path);
 
     return [baseUrl, path].join("/");
+  }
+
+  private getHeaders(): Record<string, string> {
+    const accessStore = useAccessStore.getState();
+    const headers = getHeaders();
+
+    const apiKey = accessStore.moonshotApiKey;
+    if (validString(apiKey)) {
+      headers["Authorization"] = getBearerToken(apiKey);
+    }
+
+    return headers;
   }
 
   extractMessage(res: any) {
@@ -104,7 +118,7 @@ export class MoonshotApi implements LLMApi {
         method: "POST",
         body: JSON.stringify(requestPayload),
         signal: controller.signal,
-        headers: getHeaders(),
+        headers: this.getHeaders(), // Use the private method
       };
 
       // make a fetch request
@@ -122,7 +136,7 @@ export class MoonshotApi implements LLMApi {
         return stream(
           chatPath,
           requestPayload,
-          getHeaders(),
+          this.getHeaders(), // Use the private method
           tools as any,
           funcs,
           controller,

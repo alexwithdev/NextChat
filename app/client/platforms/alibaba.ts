@@ -15,6 +15,8 @@ import {
   LLMModel,
   SpeechOptions,
   MultimodalContent,
+  getBearerToken, // Add this import
+  validString, // Add this import
 } from "../api";
 import { getClientConfig } from "@/app/config/client";
 import {
@@ -84,6 +86,21 @@ export class QwenApi implements LLMApi {
     return res?.output?.choices?.at(0)?.message?.content ?? "";
   }
 
+  private getHeaders(shouldStream: boolean = false): Record<string, string> {
+    const accessStore = useAccessStore.getState();
+    const headers = getHeaders();
+
+    const apiKey = accessStore.alibabaApiKey;
+    if (validString(apiKey)) {
+      headers["Authorization"] = getBearerToken(apiKey);
+    }
+
+    // Add SSE headers for streaming
+    headers["X-DashScope-SSE"] = shouldStream ? "enable" : "disable";
+
+    return headers;
+  }
+
   speech(options: SpeechOptions): Promise<ArrayBuffer> {
     throw new Error("Method not implemented.");
   }
@@ -124,17 +141,15 @@ export class QwenApi implements LLMApi {
     options.onController?.(controller);
 
     try {
-      const headers = {
-        ...getHeaders(),
-        "X-DashScope-SSE": shouldStream ? "enable" : "disable",
-      };
+      // Replace with our private method
+      const headers = this.getHeaders(shouldStream);
 
       const chatPath = this.path(Alibaba.ChatPath);
       const chatPayload = {
         method: "POST",
         body: JSON.stringify(requestPayload),
         signal: controller.signal,
-        headers: headers,
+        headers: headers, // Using our private headers method
       };
 
       // make a fetch request
@@ -152,7 +167,7 @@ export class QwenApi implements LLMApi {
         return streamWithThink(
           chatPath,
           requestPayload,
-          headers,
+          this.getHeaders(true), // Use private headers method with streaming flag
           tools as any,
           funcs,
           controller,
