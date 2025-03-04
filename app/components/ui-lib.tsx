@@ -302,7 +302,17 @@ export function Select(
     HTMLSelectElement
   >,
 ) {
-  const { className, children, align, ...otherProps } = props;
+  const { className, children, align, value, ...otherProps } = props;
+
+  // Check if the current value exists in any of the child options
+  const childrenArray = React.Children.toArray(children);
+  const hasMatchingValue = childrenArray.some(
+    (child) =>
+      React.isValidElement(child) &&
+      "value" in child.props &&
+      String(child.props.value) === String(value),
+  );
+
   return (
     <div
       className={clsx(
@@ -313,7 +323,24 @@ export function Select(
         className,
       )}
     >
-      <select className={styles["select-with-icon-select"]} {...otherProps}>
+      <select
+        className={styles["select-with-icon-select"]}
+        {...otherProps}
+        value={value}
+      >
+        {!hasMatchingValue && value !== undefined && (
+          <option
+            value={value}
+            disabled
+            style={{
+              color: "var(--black-50)",
+              fontStyle: "italic",
+              background: "var(--gray-100)",
+            }}
+          >
+            {String(value)}
+          </option>
+        )}
         {children}
       </select>
       <DownIcon className={styles["select-with-icon-icon"]} />
