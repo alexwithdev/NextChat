@@ -19,7 +19,10 @@ export function ModelConfigList(props: {
     "provider.providerName",
   );
   const value = `${props.modelConfig.model}@${props.modelConfig?.providerName}`;
-  const compressModelValue = `${props.modelConfig.compressModel}@${props.modelConfig?.compressProviderName}`;
+  const compressModelValue =
+    props.modelConfig.compressModel || props.modelConfig?.compressProviderName
+      ? `${props.modelConfig.compressModel}@${props.modelConfig?.compressProviderName}`
+      : "";
 
   return (
     <>
