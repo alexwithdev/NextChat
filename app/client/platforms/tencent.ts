@@ -8,9 +8,7 @@ import {
   LLMApi,
   LLMModel,
   MultimodalContent,
-  SpeechOptions,
-  getBearerToken, // Add this import
-  validString, // Add this import
+  SpeechOptions, // Keep this import
 } from "../api";
 import Locale from "../../locales";
 import {
@@ -96,13 +94,7 @@ export class HunyuanApi implements LLMApi {
   }
 
   private getHeaders(): Record<string, string> {
-    const accessStore = useAccessStore.getState();
     const headers = getHeaders();
-
-    const apiKey = accessStore.tencentApiKey;
-    if (validString(apiKey)) {
-      headers["Authorization"] = getBearerToken(apiKey);
-    }
 
     return headers;
   }
