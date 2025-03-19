@@ -7,7 +7,7 @@ import clsx from "clsx";
 export type ButtonType = "primary" | "danger" | null;
 
 export function IconButton(props: {
-  onClick?: () => void;
+  onClick?: () => unknown;
   icon?: JSX.Element;
   type?: ButtonType;
   text?: string;
@@ -21,6 +21,48 @@ export function IconButton(props: {
   style?: CSSProperties;
   aria?: string;
 }) {
+  const [isLoading, setIsLoading] = React.useState(false);
+  const loadingTimerRef = React.useRef<number | null>(null);
+
+  const handleClick = () => {
+    if (!props.onClick) return;
+
+    const result = props.onClick();
+
+    if (result instanceof Promise) {
+      // 清除可能存在的旧定时器
+      if (loadingTimerRef.current !== null) {
+        clearTimeout(loadingTimerRef.current);
+      }
+
+      // 如果Promise在300ms后仍未完成，则显示loading状态
+      loadingTimerRef.current = window.setTimeout(() => {
+        setIsLoading(true);
+        loadingTimerRef.current = null;
+      }, 300);
+
+      result.finally(() => {
+        // 如果Promise完成时，定时器还存在（说明不到300ms就完成了）
+        if (loadingTimerRef.current !== null) {
+          clearTimeout(loadingTimerRef.current);
+          loadingTimerRef.current = null;
+        } else {
+          // 如果已经显示了loading，则关闭loading
+          setIsLoading(false);
+        }
+      });
+    }
+  };
+
+  // 组件卸载时清除定时器
+  React.useEffect(() => {
+    return () => {
+      if (loadingTimerRef.current !== null) {
+        clearTimeout(loadingTimerRef.current);
+      }
+    };
+  }, []);
+
   return (
     <button
       className={clsx(
@@ -33,16 +75,16 @@ export function IconButton(props: {
         styles[props.type ?? ""],
         props.className,
       )}
-      onClick={props.onClick}
+      onClick={handleClick}
       title={props.title}
-      disabled={props.disabled}
+      disabled={props.disabled || isLoading}
       role="button"
       tabIndex={props.tabIndex}
       autoFocus={props.autoFocus}
       style={props.style}
       aria-label={props.aria}
     >
-      {props.icon && (
+      {props.icon && !isLoading && (
         <div
           aria-label={props.text || props.title}
           className={clsx(styles["icon-button-icon"], {
@@ -50,6 +92,31 @@ export function IconButton(props: {
           })}
         >
           {props.icon}
+        </div>
+      )}
+
+      {isLoading && (
+        <div
+          aria-label="加载中"
+          className={clsx(styles["icon-button-icon"], {
+            "no-dark": props.type === "primary",
+          })}
+        >
+          <svg
+            className={styles["loading-icon"]}
+            viewBox="0 0 1024 1024"
+            width="16"
+            height="16"
+          >
+            <path
+              d="M512 64c-247.4 0-448 200.6-448 448s200.6 448 448 448 448-200.6 448-448-200.6-448-448-448zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z"
+              fill="#e6e6e6"
+            />
+            <path
+              d="M512 140c-205.4 0-372 166.6-372 372h72c0-165.4 134.6-300 300-300v-72z"
+              fill="currentColor"
+            />
+          </svg>
         </div>
       )}
 
