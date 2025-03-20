@@ -20,6 +20,8 @@ export function IconButton(props: {
   autoFocus?: boolean;
   style?: CSSProperties;
   aria?: string;
+  // 等待时间，单位ms，默认100ms
+  wait?: number;
 }) {
   const [isLoading, setIsLoading] = React.useState(false);
   const loadingTimerRef = React.useRef<number | null>(null);
@@ -35,21 +37,19 @@ export function IconButton(props: {
         clearTimeout(loadingTimerRef.current);
       }
 
-      // 如果Promise在300ms后仍未完成，则显示loading状态
+      // 如果Promise在[wait]ms后仍未完成，则显示loading状态
       loadingTimerRef.current = window.setTimeout(() => {
         setIsLoading(true);
         loadingTimerRef.current = null;
-      }, 300);
+      }, props.wait ?? 100);
 
       result.finally(() => {
-        // 如果Promise完成时，定时器还存在（说明不到300ms就完成了）
+        // 如果Promise完成时，定时器还存在（说明不到[wait]ms就完成了）
         if (loadingTimerRef.current !== null) {
           clearTimeout(loadingTimerRef.current);
           loadingTimerRef.current = null;
-        } else {
-          // 如果已经显示了loading，则关闭loading
-          setIsLoading(false);
         }
+        setIsLoading(false);
       });
     }
   };
