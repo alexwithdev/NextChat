@@ -115,6 +115,20 @@ function unserialize<T = unknown>(data: string, config?: SerializeConfig): T {
   return JSON.parse(serializeData);
 }
 
+// 计算字符串的哈希值
+async function calculateHash(data: string) {
+  const encoder = new TextEncoder();
+  const dataBuffer = encoder.encode(data);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", dataBuffer);
+
+  // 将哈希值转换为十六进制字符串
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return hashHex;
+}
+
 export const useSyncStore = createPersistStore(
   DEFAULT_SYNC_STATE,
   (set, get) => ({
@@ -160,6 +174,29 @@ export const useSyncStore = createPersistStore(
       return client;
     },
 
+    async _upload(key: string, data: string) {
+      const client = this.getClient();
+
+      // 计算本地数据的哈希
+      const localDataHash = await calculateHash(data);
+
+      // 执行上传操作
+      await client.set(key, data);
+
+      // 上传后验证数据一致性
+      // 获取刚上传的远程数据
+      const remoteData = await client.get(key);
+      // 计算远程数据的哈希
+      const remoteDataHash = await calculateHash(remoteData);
+
+      // 比较哈希，验证上传是否成功
+      if (localDataHash === remoteDataHash) {
+        console.log("[Sync] 数据上传成功，哈希验证一致");
+      } else {
+        throw new Error("[Sync] 数据上传可能存在异常，哈希不一致");
+      }
+    },
+
     async sync() {
       const localState = getLocalAppState();
       const provider = get().provider;
@@ -167,15 +204,13 @@ export const useSyncStore = createPersistStore(
       const client = this.getClient();
       const encryptConfig = get().encrypt;
 
+      const serializedData = serialize(localState, {
+        encrypt: encryptConfig.enabled ? encryptConfig : undefined,
+      });
       try {
         const remoteState = await client.get(config.username);
         if (!remoteState || remoteState === "") {
-          await client.set(
-            config.username,
-            serialize(localState, {
-              encrypt: encryptConfig.enabled ? encryptConfig : undefined,
-            }),
-          );
+          await this._upload(config.username, serializedData);
           console.log(
             "[Sync] Remote state is empty, using local state instead.",
           );
@@ -192,12 +227,7 @@ export const useSyncStore = createPersistStore(
         throw e;
       }
 
-      await client.set(
-        config.username,
-        serialize(localState, {
-          encrypt: encryptConfig.enabled ? encryptConfig : undefined,
-        }),
-      );
+      await this._upload(config.username, serializedData);
 
       this.markSyncTime();
     },
@@ -206,10 +236,9 @@ export const useSyncStore = createPersistStore(
       const localState = getLocalAppState();
       const provider = get().provider;
       const config = get()[provider];
-      const client = this.getClient();
       const encryptConfig = get().encrypt;
 
-      await client.set(
+      await this._upload(
         config.username,
         serialize(localState, {
           encrypt: encryptConfig.enabled ? encryptConfig : undefined,
