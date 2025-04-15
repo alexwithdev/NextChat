@@ -79,7 +79,8 @@ function serialize<T = unknown>(data: T, config?: SerializeConfig) {
       encrypt.digest,
     ) as unknown as Uint8Array;
     const aesCtr = new aes.ModeOfOperation.ctr(key, new aes.Counter(5));
-    const textBytes = aes.utils.utf8.toBytes(serializeData);
+    // 使用固定长度的块进行加密，确保每个字符都被完整处理
+    const textBytes = new TextEncoder().encode(serializeData);
     const encryptedBytes = aesCtr.encrypt(textBytes);
     serializeData = aes.utils.hex.fromBytes(encryptedBytes);
   }
@@ -107,7 +108,8 @@ function unserialize<T = unknown>(data: string, config?: SerializeConfig): T {
     ) as unknown as Uint8Array;
     const aesCtr = new aes.ModeOfOperation.ctr(key, new aes.Counter(5));
     const decryptedBytes = aesCtr.decrypt(encryptedBytes);
-    serializeData = aes.utils.utf8.fromBytes(decryptedBytes);
+    // 使用 TextDecoder 确保 UTF-8 字符（包括表情符号）被正确解码
+    serializeData = new TextDecoder("utf-8").decode(decryptedBytes);
   }
 
   return JSON.parse(serializeData);
