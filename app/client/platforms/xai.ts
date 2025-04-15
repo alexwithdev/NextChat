@@ -90,13 +90,16 @@ export class XAIApi implements LLMApi {
       },
     };
 
+    const hasPenalty = !["grok-3-mini-latest", "grok-3-mini"].includes(
+      modelConfig.model.trim(),
+    );
     const requestPayload: RequestPayload = {
       messages,
       stream: options.config.stream,
       model: modelConfig.model,
       temperature: modelConfig.temperature,
-      presence_penalty: modelConfig.presence_penalty,
-      frequency_penalty: modelConfig.frequency_penalty,
+      presence_penalty: hasPenalty ? modelConfig.presence_penalty : undefined,
+      frequency_penalty: hasPenalty ? modelConfig.frequency_penalty : undefined,
       top_p: modelConfig.top_p,
     };
 
