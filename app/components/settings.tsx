@@ -552,7 +552,7 @@ function SyncItems() {
               : Locale.Settings.Sync.NotSyncYet
           }
         >
-          <div style={{ display: "flex" }}>
+          <div style={{ display: "flex", flexWrap: "wrap" }}>
             <IconButton
               aria={Locale.Settings.Sync.CloudState + Locale.UI.Config}
               icon={<ConfigIcon />}
@@ -611,7 +611,7 @@ function SyncItems() {
           title={Locale.Settings.Sync.LocalState}
           subTitle={Locale.Settings.Sync.Overview(stateOverview)}
         >
-          <div style={{ display: "flex" }}>
+          <div style={{ display: "flex", flexWrap: "wrap" }}>
             <IconButton
               aria={Locale.Settings.Sync.LocalState + Locale.UI.Export}
               icon={<UploadIcon />}
